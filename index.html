@@ -11,10 +11,10 @@
       --shadow:0 18px 45px rgba(0,0,0,.35);
     }
     *{box-sizing:border-box}
-    html,body{margin:0;height:100%;font-family:Inter,Segoe UI,Arial,sans-serif;background:linear-gradient(135deg,#070a0e,#0e151d 45%,#091018);color:var(--text)}
+    html,body{margin:0;min-height:100%;font-family:Inter,Segoe UI,Arial,sans-serif;background:linear-gradient(135deg,#070a0e,#0e151d 45%,#091018);color:var(--text);overflow-x:hidden;overflow-y:auto}
     button,input{font:inherit}
-    .app{height:100%;display:grid;grid-template-columns:320px 1fr;overflow:hidden}
-    .sidebar{background:rgba(10,15,21,.95);border-right:1px solid var(--line);display:flex;flex-direction:column;min-width:0}
+    .app{min-height:100vh;display:grid;grid-template-columns:320px 1fr;overflow:visible}
+    .sidebar{background:rgba(10,15,21,.95);border-right:1px solid var(--line);display:flex;flex-direction:column;min-width:0;position:sticky;top:0;height:100vh;overflow:hidden}
     .brand{padding:22px;border-bottom:1px solid var(--line)}
     .eyebrow{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent)}
     .brand h1{font-size:22px;margin:8px 0 6px}
@@ -22,12 +22,12 @@
     .search{padding:14px;border-bottom:1px solid var(--line)}
     .search input{width:100%;border:1px solid var(--line);background:#0d141c;color:var(--text);padding:12px 14px;border-radius:12px;outline:none}
     .search input:focus{border-color:var(--accent2)}
-    .nav{overflow:auto;padding:10px}
+    .nav{overflow-y:auto;overflow-x:hidden;padding:10px;min-height:0}
     .nav button{width:100%;text-align:left;background:transparent;color:var(--muted);border:0;padding:12px 13px;border-radius:11px;cursor:pointer;margin:3px 0;transition:.2s}
     .nav button:hover{background:rgba(255,255,255,.05);color:var(--text)}
     .nav button.active{background:linear-gradient(90deg,rgba(215,180,106,.18),rgba(119,210,255,.08));color:#fff;border:1px solid rgba(215,180,106,.25)}
     .side-footer{margin-top:auto;padding:14px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
-    .main{overflow:auto;padding:24px}
+    .main{overflow:visible;padding:24px;min-width:0}
     .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:20px}
     .topbar h2{margin:0;font-size:28px}
     .actions{display:flex;flex-wrap:wrap;gap:9px}
@@ -82,7 +82,7 @@
     .note{background:rgba(119,210,255,.08);border-left:3px solid var(--accent2);padding:12px 14px;border-radius:10px;margin-top:15px;color:#cfefff}
     .warning{background:rgba(255,125,125,.08);border-left:3px solid var(--danger);padding:12px 14px;border-radius:10px;margin-top:15px;color:#ffd1d1}
     @media(max-width:850px){
-      .app{grid-template-columns:1fr}.sidebar{position:fixed;inset:0 24% 0 0;z-index:20;transform:translateX(-110%);transition:.25s;box-shadow:var(--shadow)}
+      .app{grid-template-columns:1fr}.sidebar{position:fixed;inset:0 24% 0 0;height:100vh;z-index:20;transform:translateX(-110%);transition:.25s;box-shadow:var(--shadow)}
       .sidebar.open{transform:translateX(0)}.main{padding:16px}.topbar h2{font-size:22px}.mobile-menu{display:inline-flex!important}
       .en{font-size:20px}
     }
@@ -112,6 +112,7 @@
       <div class="actions">
         <button class="btn" onclick="prevCard()">← Назад</button>
         <button class="btn" onclick="nextCard()">Вперёд →</button>
+        <button class="btn" onclick="scrollPage(520)">↓ Перевод</button>
         <button class="btn blue" onclick="toggleQuick()">Quick Mode</button>
         <button class="btn primary" onclick="speakCurrent()">▶ Озвучить</button>
       </div>
@@ -417,8 +418,8 @@ function render(){
   renderNav(search.value);
 }
 function formatText(t){return t.trim().split(/\n+/).map(x=>`<p>${x}</p>`).join('')}
-function nextCard(){current=(current+1)%sections.length;render()}
-function prevCard(){current=(current-1+sections.length)%sections.length;render()}
+function nextCard(){current=(current+1)%sections.length;render();window.scrollTo({top:0,behavior:'smooth'})}
+function prevCard(){current=(current-1+sections.length)%sections.length;render();window.scrollTo({top:0,behavior:'smooth'})}
 function toggleQuick(){
   quick=!quick; document.body.classList.toggle('quick',quick);
   if(quick) document.getElementById('sidebar').classList.remove('open');
@@ -441,11 +442,11 @@ document.addEventListener('keydown',e=>{
   if(e.key==='ArrowLeft')prevCard();
   if(e.key==='Escape'&&quick)toggleQuick();
 });
+function scrollPage(amount){
+  window.scrollBy({top:amount,behavior:'smooth'});
+}
 document.addEventListener('wheel',e=>{
-  if(quick){
-    const main=document.querySelector('.main');
-    main.scrollTop += e.deltaY;
-  }
+  window.scrollBy(0,e.deltaY);
 },{passive:true});
 render();
 </script>
