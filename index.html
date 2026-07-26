@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dubai Interview Assistant — Alikhan</title>
+  <style>
+    :root{
+      --bg:#0b0f14;--panel:#111821;--panel2:#17212c;--text:#eef4f8;--muted:#9fb0bf;
+      --accent:#d7b46a;--accent2:#77d2ff;--line:rgba(255,255,255,.08);--danger:#ff7d7d;
+      --shadow:0 18px 45px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;height:100%;font-family:Inter,Segoe UI,Arial,sans-serif;background:linear-gradient(135deg,#070a0e,#0e151d 45%,#091018);color:var(--text)}
+    button,input{font:inherit}
+    .app{height:100%;display:grid;grid-template-columns:320px 1fr;overflow:hidden}
+    .sidebar{background:rgba(10,15,21,.95);border-right:1px solid var(--line);display:flex;flex-direction:column;min-width:0}
+    .brand{padding:22px;border-bottom:1px solid var(--line)}
+    .eyebrow{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent)}
+    .brand h1{font-size:22px;margin:8px 0 6px}
+    .brand p{font-size:13px;line-height:1.45;color:var(--muted);margin:0}
+    .search{padding:14px;border-bottom:1px solid var(--line)}
+    .search input{width:100%;border:1px solid var(--line);background:#0d141c;color:var(--text);padding:12px 14px;border-radius:12px;outline:none}
+    .search input:focus{border-color:var(--accent2)}
+    .nav{overflow:auto;padding:10px}
+    .nav button{width:100%;text-align:left;background:transparent;color:var(--muted);border:0;padding:12px 13px;border-radius:11px;cursor:pointer;margin:3px 0;transition:.2s}
+    .nav button:hover{background:rgba(255,255,255,.05);color:var(--text)}
+    .nav button.active{background:linear-gradient(90deg,rgba(215,180,106,.18),rgba(119,210,255,.08));color:#fff;border:1px solid rgba(215,180,106,.25)}
+    .side-footer{margin-top:auto;padding:14px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+    .main{overflow:auto;padding:24px}
+    .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:20px}
+    .topbar h2{margin:0;font-size:28px}
+    .actions{display:flex;flex-wrap:wrap;gap:9px}
+    .btn{border:1px solid var(--line);background:#121a23;color:#fff;padding:10px 14px;border-radius:11px;cursor:pointer;transition:.2s}
+    .btn:hover{transform:translateY(-1px);border-color:rgba(255,255,255,.18)}
+    .btn.primary{background:linear-gradient(135deg,#b78c3a,#e0c17f);color:#111;font-weight:700;border:none}
+    .btn.blue{background:linear-gradient(135deg,#2d8bb7,#63c9f5);color:#07131a;font-weight:700;border:none}
+    .grid{display:grid;grid-template-columns:1fr;gap:16px;max-width:1100px}
+    .card{background:linear-gradient(180deg,rgba(25,35,47,.96),rgba(14,21,29,.96));border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
+    .card-head{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+    .card-head h3{margin:0;font-size:19px}
+    .tag{font-size:11px;color:#0a1117;background:var(--accent);padding:5px 9px;border-radius:999px;font-weight:800;white-space:nowrap}
+    .card-body{padding:20px}
+    .question{color:var(--accent2);font-size:14px;margin-bottom:12px}
+    .en{font-size:23px;line-height:1.45;font-weight:650;letter-spacing:.005em}
+    .ru{margin-top:16px;color:#c0ccd6;line-height:1.55;font-size:16px;padding-top:15px;border-top:1px dashed var(--line)}
+    .keywords{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+    .chip{font-size:12px;color:#dbe6ed;background:#0e151d;border:1px solid var(--line);padding:7px 9px;border-radius:999px}
+    .card-controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+    .tiny{padding:8px 10px;border-radius:9px;font-size:13px}
+    .quick .sidebar{display:none}
+    .quick .app{grid-template-columns:1fr}
+    .quick .main{display:flex;flex-direction:column;justify-content:center;padding:35px}
+    .quick .topbar{position:fixed;top:16px;left:16px;right:16px;z-index:5}
+    .quick .grid{max-width:1250px;margin:auto;width:100%}
+    .quick .card{border-radius:24px}
+    .quick .en{font-size:clamp(30px,4vw,58px);line-height:1.3}
+    .quick .ru{font-size:clamp(18px,2vw,28px)}
+    .quick .card-head h3{font-size:26px}
+    .progress{font-size:13px;color:var(--muted)}
+    .hidden{display:none!important}
+    .note{background:rgba(119,210,255,.08);border-left:3px solid var(--accent2);padding:12px 14px;border-radius:10px;margin-top:15px;color:#cfefff}
+    .warning{background:rgba(255,125,125,.08);border-left:3px solid var(--danger);padding:12px 14px;border-radius:10px;margin-top:15px;color:#ffd1d1}
+    @media(max-width:850px){
+      .app{grid-template-columns:1fr}.sidebar{position:fixed;inset:0 24% 0 0;z-index:20;transform:translateX(-110%);transition:.25s;box-shadow:var(--shadow)}
+      .sidebar.open{transform:translateX(0)}.main{padding:16px}.topbar h2{font-size:22px}.mobile-menu{display:inline-flex!important}
+      .en{font-size:20px}
+    }
+    .mobile-menu{display:none}
+  </style>
+</head>
+<body>
+<div class="app" id="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="eyebrow">Personal interview system</div>
+      <h1>Dubai Interview Assistant</h1>
+      <p>Персональный помощник Алихана для переговоров со строительной компанией.</p>
+    </div>
+    <div class="search"><input id="search" placeholder="Поиск по вопросам и фразам…" /></div>
+    <nav class="nav" id="nav"></nav>
+    <div class="side-footer">Developed for Alikhan Dzuev</div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <button class="btn mobile-menu" onclick="toggleMenu()">☰ Меню</button>
+        <h2 id="sectionTitle">Introduction</h2>
+        <div class="progress" id="progress"></div>
+      </div>
+      <div class="actions">
+        <button class="btn" onclick="prevCard()">← Назад</button>
+        <button class="btn" onclick="nextCard()">Вперёд →</button>
+        <button class="btn blue" onclick="toggleQuick()">Quick Mode</button>
+        <button class="btn primary" onclick="speakCurrent()">▶ Озвучить</button>
+      </div>
+    </div>
+    <section class="grid" id="content"></section>
+  </main>
+</div>
+
+<script>
+const sections = [
+{
+ title:"Introduction",
+ question:"Tell us about yourself.",
+ en:`Hello, and thank you for inviting me to this meeting.
+
+My name is Alikhan. I have more than fifteen years of experience in construction and building engineering.
+
+I have managed the full construction cycle: excavation, foundations, reinforced concrete structures, engineering systems, finishing works, commissioning, and project handover.
+
+I have experience managing construction sites, subcontractors, workers, technical specialists, quality, safety, deadlines, and project coordination.
+
+Now I would like to apply my experience in Dubai, adapt to the UAE construction environment, and grow within an international company.`,
+ ru:`Здравствуйте, спасибо, что пригласили меня на эту встречу.
+
+Меня зовут Алихан. У меня более пятнадцати лет опыта в строительстве и инженерных системах зданий.
+
+Я управлял полным циклом строительства: земляными работами, фундаментами, монолитными конструкциями, инженерными системами, отделкой, пусконаладкой и сдачей объектов.
+
+Сейчас я хочу применить свой опыт в Дубае, адаптироваться к строительной среде ОАЭ и развиваться в международной компании.`,
+ keys:["15+ years","full construction cycle","site management","international growth"]
+},
+{
+ title:"My Experience",
+ question:"Tell us about your professional experience.",
+ en:`I have managed residential, commercial, and infrastructure construction projects.
+
+My experience includes excavation, foundations, reinforced concrete structures, façades, roofing, MEP systems, finishing works, commissioning, and handover.
+
+I have coordinated subcontractors, workers, suppliers, engineers, technical documentation, quality, and deadlines.`,
+ ru:`Я управлял жилыми, коммерческими и инфраструктурными строительными проектами.
+
+Мой опыт включает земляные работы, фундаменты, монолитные конструкции, фасады, кровлю, инженерные системы, отделочные работы, пусконаладку и сдачу объектов.
+
+Я координировал субподрядчиков, рабочих, поставщиков, инженеров, документацию, качество и сроки.`,
+ keys:["residential","commercial","infrastructure","MEP","handover"]
+},
+{
+ title:"Why Dubai?",
+ question:"Why do you want to work in Dubai?",
+ en:`Working in Dubai has been an important professional goal for me for many years.
+
+Dubai has a strong construction industry, international projects, modern technologies, and high standards.
+
+I want to challenge myself, gain international experience, and contribute my existing construction expertise to the company.`,
+ ru:`Работа в Дубае много лет является для меня важной профессиональной целью.
+
+В Дубае сильная строительная отрасль, международные проекты, современные технологии и высокие стандарты.
+
+Я хочу принять новый профессиональный вызов, получить международный опыт и принести компании свою строительную экспертизу.`,
+ keys:["professional goal","international experience","modern technologies"]
+},
+{
+ title:"Why Site Supervisor?",
+ question:"Why are you ready to start from a site-based position?",
+ en:`I am comfortable starting in a site-based position because I want to understand the company’s processes from the inside.
+
+For me, the title is less important than responsibility, results, and professional growth.
+
+I am ready to prove myself through real work.
+
+I am starting from the site, but I am not starting from zero.`,
+ ru:`Я спокойно отношусь к началу работы непосредственно на строительном участке, потому что хочу понять процессы компании изнутри.
+
+Для меня название должности менее важно, чем ответственность, результат и профессиональный рост.
+
+Я готов доказать свою компетентность реальной работой.
+
+Я начинаю с участка, но не начинаю с нуля.`,
+ keys:["site-based role","results","professional growth","not from zero"]
+},
+{
+ title:"English Level",
+ question:"How would you describe your English level?",
+ en:`My spoken English is currently limited, but I am improving it intensively.
+
+I understand construction processes, drawings, technical documentation, and site management very well.
+
+I may sometimes ask people to repeat or speak more slowly, but I always make sure that I understand the task correctly.
+
+English is my temporary adaptation task. Construction management is already my professional competence.`,
+ ru:`Сейчас мой разговорный английский ограничен, но я интенсивно его улучшаю.
+
+Я хорошо понимаю строительные процессы, чертежи, техническую документацию и управление участком.
+
+Иногда я могу попросить повторить или говорить медленнее, но всегда убеждаюсь, что понял задачу правильно.
+
+Английский — моя временная адаптационная задача. Управление строительством — моя профессиональная компетенция.`,
+ keys:["spoken English","improving","technical documentation","temporary task"]
+},
+{
+ title:"Adaptation Period",
+ question:"How much time do you need to adapt?",
+ en:`I would like to propose a three-month probation and adaptation period.
+
+During this time, I can study the company’s procedures, UAE construction requirements, reporting system, safety standards, and professional communication.
+
+I do not need to learn construction from the beginning. I need to adapt my experience to the UAE environment.`,
+ ru:`Я хотел бы предложить трёхмесячный испытательный и адаптационный период.
+
+За это время я смогу изучить процессы компании, требования строительства в ОАЭ, систему отчётности, стандарты безопасности и профессиональную коммуникацию.
+
+Мне не нужно изучать строительство с нуля. Мне нужно адаптировать свой опыт к условиям ОАЭ.`,
+ keys:["three months","probation","UAE standards","company procedures"]
+},
+{
+ title:"Salary During Probation",
+ question:"What are your salary expectations?",
+ en:`During the probation period, I am flexible regarding the starting package, provided that my basic living and working needs are covered.
+
+My main goal is to adapt quickly, understand the company’s expectations, and demonstrate my professional value.
+
+After the probation period, I would like to review my role and compensation based on my performance.`,
+ ru:`Во время испытательного периода я гибко отношусь к стартовым условиям при условии, что мои основные бытовые и рабочие потребности обеспечены.
+
+Моя задача — быстро адаптироваться, понять ожидания компании и показать профессиональную ценность.
+
+После испытательного периода я хотел бы пересмотреть должность и оплату на основании результатов.`,
+ keys:["flexible package","basic needs","performance review"],
+ warning:"Не используйте формулировку: “I am ready to work for a very low salary.”"
+},
+{
+ title:"Three-Month Plan",
+ question:"What would your first three months look like?",
+ en:`Month one: study the project, documentation, company procedures, safety requirements, reporting, and team structure.
+
+Month two: take responsibility for site coordination, subcontractors, daily planning, quality, and progress control.
+
+Month three: manage my area independently and demonstrate measurable results.`,
+ ru:`Первый месяц: изучение проекта, документации, процессов компании, требований безопасности, отчётности и структуры команды.
+
+Второй месяц: ответственность за координацию участка, субподрядчиков, ежедневное планирование, качество и ход работ.
+
+Третий месяц: самостоятельное управление своей зоной и измеримые результаты.`,
+ keys:["Month 1 — learn","Month 2 — coordinate","Month 3 — deliver"]
+},
+{
+ title:"My Value",
+ question:"What value can you bring to the company?",
+ en:`I can bring strong construction experience, practical site management, technical thinking, discipline, and responsibility.
+
+I can identify problems early, coordinate teams, control quality, and keep the project moving.
+
+I focus on real results, clear responsibility, and practical solutions.`,
+ ru:`Я могу принести компании сильный строительный опыт, практическое управление участком, техническое мышление, дисциплину и ответственность.
+
+Я умею заранее выявлять проблемы, координировать команды, контролировать качество и поддерживать движение проекта.
+
+Я ориентирован на реальный результат, ясную ответственность и практические решения.`,
+ keys:["technical thinking","discipline","quality","practical solutions"]
+},
+{
+ title:"Project Videos",
+ question:"Can you also support the company’s public communication?",
+ en:`In addition to construction management, I have experience creating professional construction content.
+
+If this is useful for the company, I can help present project progress, engineering solutions, and construction quality through video and social media.
+
+Of course, all content should be approved by the company and follow its confidentiality policy.`,
+ ru:`Помимо управления строительством, у меня есть опыт создания профессионального строительного контента.
+
+Если это полезно компании, я могу помогать показывать ход строительства, инженерные решения и качество работ через видео и социальные сети.
+
+Разумеется, весь контент должен быть согласован с компанией и соответствовать политике конфиденциальности.`,
+ keys:["construction content","video","social media","company approval"]
+},
+{
+ title:"Questions to Employer",
+ question:"Questions I should ask.",
+ en:`1. What project and construction stage would I join?
+
+2. What exactly would my responsibilities be during the first three months?
+
+3. Who would I report to directly?
+
+4. What language is mainly used on the construction site?
+
+5. How many workers and subcontractors would be under my coordination?
+
+6. What results do you expect from me by the end of the probation period?
+
+7. What is included in the employment package?
+
+8. Does it include accommodation, transport, visa, medical insurance, and annual flight?`,
+ ru:`1. К какому объекту и на какой стадии строительства я подключусь?
+
+2. Какими будут мои точные обязанности в первые три месяца?
+
+3. Кому я буду непосредственно подчиняться?
+
+4. Какой язык преимущественно используется на объекте?
+
+5. Сколько рабочих и субподрядчиков будет под моей координацией?
+
+6. Какие результаты вы ожидаете к окончанию испытательного периода?
+
+7. Что входит в пакет трудоустройства?
+
+8. Входят ли жильё, транспорт, виза, медицинская страховка и ежегодный авиабилет?`,
+ keys:["role","reporting line","site language","package","probation results"]
+},
+{
+ title:"Final Statement",
+ question:"How should I close the conversation?",
+ en:`I am not asking for special treatment.
+
+I am proposing a practical three-month period during which I can adapt, prove my experience, and demonstrate my value to the company.
+
+If my results meet your expectations, I would be interested in long-term professional growth within the company.
+
+Thank you. I would be very interested to hear how you see my role in the company.`,
+ ru:`Я не прошу особого отношения.
+
+Я предлагаю практический трёхмесячный период, за который смогу адаптироваться, подтвердить свой опыт и показать свою ценность для компании.
+
+Если мои результаты будут соответствовать вашим ожиданиям, мне будет интересно долгосрочное развитие внутри компании.
+
+Спасибо. Мне было бы интересно услышать, как вы видите мою роль в компании.`,
+ keys:["no special treatment","prove value","long-term growth"]
+},
+{
+ title:"Emergency Phrases",
+ question:"Useful phrases during Zoom.",
+ en:`Could you please repeat the question a little more slowly?
+
+As I understand, you are asking about my experience in site management. Is that correct?
+
+I know the technical process, but I may not know the exact English term. Let me explain it in simple words.
+
+That is a good question. Let me think for a moment.
+
+I am sorry, the connection was unstable. Could you repeat the last part?
+
+This is an important technical question. May I explain the main part in Russian and then summarize it in English?`,
+ ru:`Не могли бы вы повторить вопрос немного медленнее?
+
+Насколько я понял, вы спрашиваете о моём опыте управления участком. Верно?
+
+Я знаю технический процесс, но могу не знать точного английского термина. Позвольте объяснить простыми словами.
+
+Это хороший вопрос. Позвольте немного подумать.
+
+Извините, связь была нестабильной. Можете повторить последнюю часть?
+
+Это важный технический вопрос. Могу я объяснить основную часть по-русски, а затем кратко подвести итог на английском?`,
+ keys:["repeat slowly","clarify","simple words","connection"]
+}
+];
+
+let current = 0;
+let quick = false;
+
+const nav = document.getElementById('nav');
+const content = document.getElementById('content');
+const title = document.getElementById('sectionTitle');
+const progress = document.getElementById('progress');
+const search = document.getElementById('search');
+
+function renderNav(filter=''){
+  nav.innerHTML='';
+  const q=filter.toLowerCase();
+  sections.forEach((s,i)=>{
+    const hay=(s.title+' '+s.question+' '+s.en+' '+s.ru).toLowerCase();
+    if(q && !hay.includes(q)) return;
+    const b=document.createElement('button');
+    b.textContent=(i+1)+'. '+s.title;
+    b.className=i===current?'active':'';
+    b.onclick=()=>{current=i;render(); if(innerWidth<850) toggleMenu(false);}
+    nav.appendChild(b);
+  });
+}
+function render(){
+  const s=sections[current];
+  title.textContent=s.title;
+  progress.textContent=`Карточка ${current+1} из ${sections.length}`;
+  content.innerHTML=`
+    <article class="card">
+      <div class="card-head">
+        <div><div class="question">${s.question}</div><h3>${s.title}</h3></div>
+        <span class="tag">READY</span>
+      </div>
+      <div class="card-body">
+        <div class="en">${formatText(s.en)}</div>
+        <div class="ru">${formatText(s.ru)}</div>
+        ${s.warning?`<div class="warning">${s.warning}</div>`:''}
+        <div class="keywords">${s.keys.map(k=>`<span class="chip">${k}</span>`).join('')}</div>
+        <div class="card-controls">
+          <button class="btn tiny primary" onclick="speakCurrent()">▶ Озвучить английский</button>
+          <button class="btn tiny" onclick="copyEnglish()">Копировать EN</button>
+          <button class="btn tiny" onclick="copyRussian()">Копировать RU</button>
+        </div>
+      </div>
+    </article>`;
+  renderNav(search.value);
+}
+function formatText(t){return t.trim().split(/\n+/).map(x=>`<p>${x}</p>`).join('')}
+function nextCard(){current=(current+1)%sections.length;render()}
+function prevCard(){current=(current-1+sections.length)%sections.length;render()}
+function toggleQuick(){
+  quick=!quick; document.body.classList.toggle('quick',quick);
+  if(quick) document.getElementById('sidebar').classList.remove('open');
+}
+function speakCurrent(){
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(sections[current].en);
+  u.lang='en-US';u.rate=.86;u.pitch=1;
+  speechSynthesis.speak(u);
+}
+function copyEnglish(){navigator.clipboard.writeText(sections[current].en)}
+function copyRussian(){navigator.clipboard.writeText(sections[current].ru)}
+function toggleMenu(force){
+  const sb=document.getElementById('sidebar');
+  if(force===false) sb.classList.remove('open'); else sb.classList.toggle('open');
+}
+search.addEventListener('input',e=>renderNav(e.target.value));
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight')nextCard();
+  if(e.key==='ArrowLeft')prevCard();
+  if(e.key==='Escape'&&quick)toggleQuick();
+});
+render();
+</script>
+</body>
+</html>
