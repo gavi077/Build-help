@@ -1,454 +1,183 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dubai Interview Assistant — Alikhan</title>
-  <style>
-    :root{
-      --bg:#0b0f14;--panel:#111821;--panel2:#17212c;--text:#eef4f8;--muted:#9fb0bf;
-      --accent:#d7b46a;--accent2:#77d2ff;--line:rgba(255,255,255,.08);--danger:#ff7d7d;
-      --shadow:0 18px 45px rgba(0,0,0,.35);
-    }
-    *{box-sizing:border-box}
-    html,body{margin:0;min-height:100%;font-family:Inter,Segoe UI,Arial,sans-serif;background:linear-gradient(135deg,#070a0e,#0e151d 45%,#091018);color:var(--text);overflow-x:hidden;overflow-y:auto}
-    button,input{font:inherit}
-    .app{min-height:100vh;display:grid;grid-template-columns:320px 1fr;overflow:visible}
-    .sidebar{background:rgba(10,15,21,.95);border-right:1px solid var(--line);display:flex;flex-direction:column;min-width:0;position:sticky;top:0;height:100vh;overflow:hidden}
-    .brand{padding:22px;border-bottom:1px solid var(--line)}
-    .eyebrow{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent)}
-    .brand h1{font-size:22px;margin:8px 0 6px}
-    .brand p{font-size:13px;line-height:1.45;color:var(--muted);margin:0}
-    .search{padding:14px;border-bottom:1px solid var(--line)}
-    .search input{width:100%;border:1px solid var(--line);background:#0d141c;color:var(--text);padding:12px 14px;border-radius:12px;outline:none}
-    .search input:focus{border-color:var(--accent2)}
-    .nav{overflow-y:auto;overflow-x:hidden;padding:10px;min-height:0}
-    .nav button{width:100%;text-align:left;background:transparent;color:var(--muted);border:0;padding:12px 13px;border-radius:11px;cursor:pointer;margin:3px 0;transition:.2s}
-    .nav button:hover{background:rgba(255,255,255,.05);color:var(--text)}
-    .nav button.active{background:linear-gradient(90deg,rgba(215,180,106,.18),rgba(119,210,255,.08));color:#fff;border:1px solid rgba(215,180,106,.25)}
-    .side-footer{margin-top:auto;padding:14px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
-    .main{overflow:visible;padding:24px;min-width:0}
-    .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:20px}
-    .topbar h2{margin:0;font-size:28px}
-    .actions{display:flex;flex-wrap:wrap;gap:9px}
-    .btn{border:1px solid var(--line);background:#121a23;color:#fff;padding:10px 14px;border-radius:11px;cursor:pointer;transition:.2s}
-    .btn:hover{transform:translateY(-1px);border-color:rgba(255,255,255,.18)}
-    .btn.primary{background:linear-gradient(135deg,#b78c3a,#e0c17f);color:#111;font-weight:700;border:none}
-    .btn.blue{background:linear-gradient(135deg,#2d8bb7,#63c9f5);color:#07131a;font-weight:700;border:none}
-    .grid{display:grid;grid-template-columns:1fr;gap:16px;max-width:1100px}
-    .card{background:linear-gradient(180deg,rgba(25,35,47,.96),rgba(14,21,29,.96));border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
-    .card-head{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
-    .card-head h3{margin:0;font-size:19px}
-    .tag{font-size:11px;color:#0a1117;background:var(--accent);padding:5px 9px;border-radius:999px;font-weight:800;white-space:nowrap}
-    .card-body{padding:20px}
-    .question{color:var(--accent2);font-size:14px;margin-bottom:12px}
-    .en{font-size:23px;line-height:1.45;font-weight:650;letter-spacing:.005em}
-    .ru{margin-top:16px;color:#c0ccd6;line-height:1.55;font-size:16px;padding-top:15px;border-top:1px dashed var(--line)}
-    .keywords{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
-    .chip{font-size:12px;color:#dbe6ed;background:#0e151d;border:1px solid var(--line);padding:7px 9px;border-radius:999px}
-    .card-controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
-    .tiny{padding:8px 10px;border-radius:9px;font-size:13px}
-    .quick .sidebar{display:none}
-    .quick .app{grid-template-columns:1fr}
-    .quick{overflow:auto}
-    .quick body{overflow:auto}
-    .quick .app{height:auto;min-height:100%;overflow:visible}
-    .quick .main{
-      display:block;
-      min-height:100vh;
-      overflow-y:auto;
-      overflow-x:hidden;
-      padding:110px 35px 50px;
-    }
-    .quick .topbar{
-      position:fixed;
-      top:16px;
-      left:16px;
-      right:16px;
-      z-index:5;
-      padding:10px 14px;
-      border-radius:16px;
-      background:rgba(7,10,14,.88);
-      backdrop-filter:blur(12px);
-      border:1px solid var(--line);
-    }
-    .quick .grid{max-width:1250px;margin:0 auto;width:100%}
-    .quick .card{border-radius:24px}
-    .quick .en{font-size:clamp(30px,4vw,58px);line-height:1.3}
-    .quick .ru{font-size:clamp(18px,2vw,28px)}
-    .quick .card-head h3{font-size:26px}
-    .progress{font-size:13px;color:var(--muted)}
-    .hidden{display:none!important}
-    .note{background:rgba(119,210,255,.08);border-left:3px solid var(--accent2);padding:12px 14px;border-radius:10px;margin-top:15px;color:#cfefff}
-    .warning{background:rgba(255,125,125,.08);border-left:3px solid var(--danger);padding:12px 14px;border-radius:10px;margin-top:15px;color:#ffd1d1}
-    @media(max-width:850px){
-      .app{grid-template-columns:1fr}.sidebar{position:fixed;inset:0 24% 0 0;height:100vh;z-index:20;transform:translateX(-110%);transition:.25s;box-shadow:var(--shadow)}
-      .sidebar.open{transform:translateX(0)}.main{padding:16px}.topbar h2{font-size:22px}.mobile-menu{display:inline-flex!important}
-      .en{font-size:20px}
-    }
-    .mobile-menu{display:none}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>СТРОЙМЕТР — Карманный строительный помощник</title>
+<style>
+:root{
+  --bg:#0d1117;--panel:#151b23;--panel2:#1d2632;--line:#2c3948;
+  --text:#eef4f8;--muted:#9fb0bf;--accent:#f4b942;--ok:#4ade80;
+}
+*{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(135deg,#0b0f14,#111a24);color:var(--text)}
+header{padding:22px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(13,17,23,.95);backdrop-filter:blur(10px);z-index:5}
+.brand{max-width:1200px;margin:auto;display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+h1{margin:0;font-size:28px;letter-spacing:.8px}.sub{color:var(--muted);font-size:14px;margin-top:4px}
+.search{min-width:280px;flex:1;max-width:420px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--text)}
+main{max-width:1200px;margin:0 auto;padding:20px;display:grid;grid-template-columns:320px 1fr;gap:18px}
+.sidebar,.content{background:rgba(21,27,35,.94);border:1px solid var(--line);border-radius:16px}
+.sidebar{padding:14px;height:calc(100vh - 125px);overflow:auto;position:sticky;top:105px}
+.cat{margin-bottom:12px}.cat-title{font-weight:800;padding:11px 12px;background:var(--panel2);border-radius:10px;cursor:pointer;display:flex;justify-content:space-between}
+.items{padding:6px 0 0}.item{display:block;width:100%;text-align:left;background:transparent;color:var(--muted);border:0;border-radius:9px;padding:9px 10px;cursor:pointer}
+.item:hover,.item.active{background:#263343;color:#fff}
+.content{padding:22px;min-height:600px}
+.hero{padding:24px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(135deg,#192433,#121923)}
+.hero h2{margin-top:0;font-size:25px}.badges{display:flex;gap:8px;flex-wrap:wrap}.badge{border:1px solid var(--line);padding:6px 9px;border-radius:999px;color:var(--muted);font-size:12px}
+.calc-title{margin:0 0 8px;font-size:26px}.desc{color:var(--muted);line-height:1.55}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;margin-top:20px}
+.field label{display:block;color:var(--muted);font-size:13px;margin:0 0 6px}
+.field input,.field select{width:100%;padding:12px 13px;border-radius:10px;border:1px solid var(--line);background:#0f151d;color:var(--text);font-size:15px}
+.actions{margin-top:17px;display:flex;gap:10px;flex-wrap:wrap}
+button.primary{border:0;border-radius:11px;padding:12px 18px;background:var(--accent);color:#181818;font-weight:800;cursor:pointer}
+button.secondary{border:1px solid var(--line);border-radius:11px;padding:12px 18px;background:transparent;color:var(--text);cursor:pointer}
+.result{margin-top:20px;border-left:4px solid var(--ok);background:#101a16;padding:16px;border-radius:10px;display:none}
+.result strong{font-size:23px;color:#b8f7ca}.formula{margin-top:18px;background:#0f151d;border:1px dashed var(--line);padding:14px;border-radius:10px;color:#d5e1ea}
+.note{margin-top:16px;padding:13px;border-radius:10px;background:#211c10;color:#f2d58b;font-size:13px;line-height:1.5}
+footer{max-width:1200px;margin:0 auto;padding:0 20px 24px;color:var(--muted);font-size:12px}
+
+.edu-card{margin-top:18px;padding:18px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(135deg,#17212c,#111820)}
+.edu-card h3{margin:0 0 10px;font-size:19px}.edu-card h4{margin:16px 0 7px;font-size:15px;color:#f6d27a}
+.edu-card p{margin:0;color:#c7d3dd;line-height:1.6}.symbols{width:100%;border-collapse:collapse;margin-top:8px}
+.symbols td{padding:8px 9px;border-bottom:1px solid var(--line);vertical-align:top}.symbols td:first-child{width:92px;color:var(--accent);font-weight:800}
+.insight{margin-top:15px;padding:13px 14px;border-left:4px solid var(--accent);background:#201b11;border-radius:8px;color:#f3ddb0;line-height:1.5}
+.section-label{margin-top:24px;font-size:18px;font-weight:800}
+
+
+.example-box{margin-top:15px;padding:14px;border-radius:10px;background:#101820;border:1px solid var(--line)}
+.example-box b{color:#f6d27a}.example-data{margin-top:8px;color:#c7d3dd;line-height:1.55}.example-result{margin-top:8px;font-size:18px;color:#b8f7ca;font-weight:800}
+
+@media(max-width:850px){main{grid-template-columns:1fr}.sidebar{position:relative;top:0;height:auto}.form-grid{grid-template-columns:1fr}header{position:relative}.search{max-width:none;width:100%}}
+</style>
 </head>
 <body>
-<div class="app" id="app">
-  <aside class="sidebar" id="sidebar">
-    <div class="brand">
-      <div class="eyebrow">Personal interview system</div>
-      <h1>Dubai Interview Assistant</h1>
-      <p>Персональный помощник Алихана для переговоров со строительной компанией.</p>
+<header>
+  <div class="brand">
+    <div>
+      <h1>СТРОЙМЕТР</h1>
+      <div class="sub">Карманный строительный помощник</div>
     </div>
-    <div class="search"><input id="search" placeholder="Поиск по вопросам и фразам…" /></div>
-    <nav class="nav" id="nav"></nav>
-    <div class="side-footer">Developed for Alikhan Dzuev</div>
-  </aside>
+    <input id="search" class="search" placeholder="Найти расчёт: бетон, плитка, арматура...">
+  </div>
+</header>
 
-  <main class="main">
-    <div class="topbar">
-      <div>
-        <button class="btn mobile-menu" onclick="toggleMenu()">☰ Меню</button>
-        <h2 id="sectionTitle">Introduction</h2>
-        <div class="progress" id="progress"></div>
+<main>
+  <aside class="sidebar" id="sidebar"></aside>
+  <section class="content" id="content">
+    <div class="hero">
+      <h2>Расчёты прямо на строительной площадке</h2>
+      <p class="desc">Выберите нужный раздел слева, введите свои размеры — приложение сразу покажет объём, количество, запас и итог.</p>
+      <div class="badges">
+        <span class="badge">Работает без интернета</span>
+        <span class="badge">Мобильная версия</span>
+        <span class="badge">Формулы и пояснения</span>
+        <span class="badge">Без регистрации</span>
       </div>
-      <div class="actions">
-        <button class="btn" onclick="prevCard()">← Назад</button>
-        <button class="btn" onclick="nextCard()">Вперёд →</button>
-        <button class="btn" onclick="scrollPage(520)">↓ Перевод</button>
-        <button class="btn blue" onclick="toggleQuick()">Quick Mode</button>
-        <button class="btn primary" onclick="speakCurrent()">▶ Озвучить</button>
-      </div>
+      <div class="note">Расчёты предварительные. Несущие конструкции, диаметры арматуры, инженерные мощности и сечения принимаются только по проекту.</div>
     </div>
-    <section class="grid" id="content"></section>
-  </main>
-</div>
+  </section>
+</main>
+
+<footer>СТРОЙМЕТР • MVP 1.0 • Developed by Alikhan Dzuev</footer>
 
 <script>
-const sections = [
-{
- title:"Introduction",
- question:"Tell us about yourself.",
- en:`Hello, and thank you for inviting me to this meeting.
-
-My name is Alikhan. I have more than fifteen years of experience in construction and building engineering.
-
-I have managed the full construction cycle: excavation, foundations, reinforced concrete structures, engineering systems, finishing works, commissioning, and project handover.
-
-I have experience managing construction sites, subcontractors, workers, technical specialists, quality, safety, deadlines, and project coordination.
-
-Now I would like to apply my experience in Dubai, adapt to the UAE construction environment, and grow within an international company.`,
- ru:`Здравствуйте, спасибо, что пригласили меня на эту встречу.
-
-Меня зовут Алихан. У меня более пятнадцати лет опыта в строительстве и инженерных системах зданий.
-
-Я управлял полным циклом строительства: земляными работами, фундаментами, монолитными конструкциями, инженерными системами, отделкой, пусконаладкой и сдачей объектов.
-
-Сейчас я хочу применить свой опыт в Дубае, адаптироваться к строительной среде ОАЭ и развиваться в международной компании.`,
- keys:["15+ years","full construction cycle","site management","international growth"]
-},
-{
- title:"My Experience",
- question:"Tell us about your professional experience.",
- en:`I have managed residential, commercial, and infrastructure construction projects.
-
-My experience includes excavation, foundations, reinforced concrete structures, façades, roofing, MEP systems, finishing works, commissioning, and handover.
-
-I have coordinated subcontractors, workers, suppliers, engineers, technical documentation, quality, and deadlines.`,
- ru:`Я управлял жилыми, коммерческими и инфраструктурными строительными проектами.
-
-Мой опыт включает земляные работы, фундаменты, монолитные конструкции, фасады, кровлю, инженерные системы, отделочные работы, пусконаладку и сдачу объектов.
-
-Я координировал субподрядчиков, рабочих, поставщиков, инженеров, документацию, качество и сроки.`,
- keys:["residential","commercial","infrastructure","MEP","handover"]
-},
-{
- title:"Why Dubai?",
- question:"Why do you want to work in Dubai?",
- en:`Working in Dubai has been an important professional goal for me for many years.
-
-Dubai has a strong construction industry, international projects, modern technologies, and high standards.
-
-I want to challenge myself, gain international experience, and contribute my existing construction expertise to the company.`,
- ru:`Работа в Дубае много лет является для меня важной профессиональной целью.
-
-В Дубае сильная строительная отрасль, международные проекты, современные технологии и высокие стандарты.
-
-Я хочу принять новый профессиональный вызов, получить международный опыт и принести компании свою строительную экспертизу.`,
- keys:["professional goal","international experience","modern technologies"]
-},
-{
- title:"Why Site Supervisor?",
- question:"Why are you ready to start from a site-based position?",
- en:`I am comfortable starting in a site-based position because I want to understand the company’s processes from the inside.
-
-For me, the title is less important than responsibility, results, and professional growth.
-
-I am ready to prove myself through real work.
-
-I am starting from the site, but I am not starting from zero.`,
- ru:`Я спокойно отношусь к началу работы непосредственно на строительном участке, потому что хочу понять процессы компании изнутри.
-
-Для меня название должности менее важно, чем ответственность, результат и профессиональный рост.
-
-Я готов доказать свою компетентность реальной работой.
-
-Я начинаю с участка, но не начинаю с нуля.`,
- keys:["site-based role","results","professional growth","not from zero"]
-},
-{
- title:"English Level",
- question:"How would you describe your English level?",
- en:`My spoken English is currently limited, but I am improving it intensively.
-
-I understand construction processes, drawings, technical documentation, and site management very well.
-
-I may sometimes ask people to repeat or speak more slowly, but I always make sure that I understand the task correctly.
-
-English is my temporary adaptation task. Construction management is already my professional competence.`,
- ru:`Сейчас мой разговорный английский ограничен, но я интенсивно его улучшаю.
-
-Я хорошо понимаю строительные процессы, чертежи, техническую документацию и управление участком.
-
-Иногда я могу попросить повторить или говорить медленнее, но всегда убеждаюсь, что понял задачу правильно.
-
-Английский — моя временная адаптационная задача. Управление строительством — моя профессиональная компетенция.`,
- keys:["spoken English","improving","technical documentation","temporary task"]
-},
-{
- title:"Adaptation Period",
- question:"How much time do you need to adapt?",
- en:`I would like to propose a three-month probation and adaptation period.
-
-During this time, I can study the company’s procedures, UAE construction requirements, reporting system, safety standards, and professional communication.
-
-I do not need to learn construction from the beginning. I need to adapt my experience to the UAE environment.`,
- ru:`Я хотел бы предложить трёхмесячный испытательный и адаптационный период.
-
-За это время я смогу изучить процессы компании, требования строительства в ОАЭ, систему отчётности, стандарты безопасности и профессиональную коммуникацию.
-
-Мне не нужно изучать строительство с нуля. Мне нужно адаптировать свой опыт к условиям ОАЭ.`,
- keys:["three months","probation","UAE standards","company procedures"]
-},
-{
- title:"Salary During Probation",
- question:"What are your salary expectations?",
- en:`During the probation period, I am flexible regarding the starting package, provided that my basic living and working needs are covered.
-
-My main goal is to adapt quickly, understand the company’s expectations, and demonstrate my professional value.
-
-After the probation period, I would like to review my role and compensation based on my performance.`,
- ru:`Во время испытательного периода я гибко отношусь к стартовым условиям при условии, что мои основные бытовые и рабочие потребности обеспечены.
-
-Моя задача — быстро адаптироваться, понять ожидания компании и показать профессиональную ценность.
-
-После испытательного периода я хотел бы пересмотреть должность и оплату на основании результатов.`,
- keys:["flexible package","basic needs","performance review"],
- warning:"Не используйте формулировку: “I am ready to work for a very low salary.”"
-},
-{
- title:"Three-Month Plan",
- question:"What would your first three months look like?",
- en:`Month one: study the project, documentation, company procedures, safety requirements, reporting, and team structure.
-
-Month two: take responsibility for site coordination, subcontractors, daily planning, quality, and progress control.
-
-Month three: manage my area independently and demonstrate measurable results.`,
- ru:`Первый месяц: изучение проекта, документации, процессов компании, требований безопасности, отчётности и структуры команды.
-
-Второй месяц: ответственность за координацию участка, субподрядчиков, ежедневное планирование, качество и ход работ.
-
-Третий месяц: самостоятельное управление своей зоной и измеримые результаты.`,
- keys:["Month 1 — learn","Month 2 — coordinate","Month 3 — deliver"]
-},
-{
- title:"My Value",
- question:"What value can you bring to the company?",
- en:`I can bring strong construction experience, practical site management, technical thinking, discipline, and responsibility.
-
-I can identify problems early, coordinate teams, control quality, and keep the project moving.
-
-I focus on real results, clear responsibility, and practical solutions.`,
- ru:`Я могу принести компании сильный строительный опыт, практическое управление участком, техническое мышление, дисциплину и ответственность.
-
-Я умею заранее выявлять проблемы, координировать команды, контролировать качество и поддерживать движение проекта.
-
-Я ориентирован на реальный результат, ясную ответственность и практические решения.`,
- keys:["technical thinking","discipline","quality","practical solutions"]
-},
-{
- title:"Project Videos",
- question:"Can you also support the company’s public communication?",
- en:`In addition to construction management, I have experience creating professional construction content.
-
-If this is useful for the company, I can help present project progress, engineering solutions, and construction quality through video and social media.
-
-Of course, all content should be approved by the company and follow its confidentiality policy.`,
- ru:`Помимо управления строительством, у меня есть опыт создания профессионального строительного контента.
-
-Если это полезно компании, я могу помогать показывать ход строительства, инженерные решения и качество работ через видео и социальные сети.
-
-Разумеется, весь контент должен быть согласован с компанией и соответствовать политике конфиденциальности.`,
- keys:["construction content","video","social media","company approval"]
-},
-{
- title:"Questions to Employer",
- question:"Questions I should ask.",
- en:`1. What project and construction stage would I join?
-
-2. What exactly would my responsibilities be during the first three months?
-
-3. Who would I report to directly?
-
-4. What language is mainly used on the construction site?
-
-5. How many workers and subcontractors would be under my coordination?
-
-6. What results do you expect from me by the end of the probation period?
-
-7. What is included in the employment package?
-
-8. Does it include accommodation, transport, visa, medical insurance, and annual flight?`,
- ru:`1. К какому объекту и на какой стадии строительства я подключусь?
-
-2. Какими будут мои точные обязанности в первые три месяца?
-
-3. Кому я буду непосредственно подчиняться?
-
-4. Какой язык преимущественно используется на объекте?
-
-5. Сколько рабочих и субподрядчиков будет под моей координацией?
-
-6. Какие результаты вы ожидаете к окончанию испытательного периода?
-
-7. Что входит в пакет трудоустройства?
-
-8. Входят ли жильё, транспорт, виза, медицинская страховка и ежегодный авиабилет?`,
- keys:["role","reporting line","site language","package","probation results"]
-},
-{
- title:"Final Statement",
- question:"How should I close the conversation?",
- en:`I am not asking for special treatment.
-
-I am proposing a practical three-month period during which I can adapt, prove my experience, and demonstrate my value to the company.
-
-If my results meet your expectations, I would be interested in long-term professional growth within the company.
-
-Thank you. I would be very interested to hear how you see my role in the company.`,
- ru:`Я не прошу особого отношения.
-
-Я предлагаю практический трёхмесячный период, за который смогу адаптироваться, подтвердить свой опыт и показать свою ценность для компании.
-
-Если мои результаты будут соответствовать вашим ожиданиям, мне будет интересно долгосрочное развитие внутри компании.
-
-Спасибо. Мне было бы интересно услышать, как вы видите мою роль в компании.`,
- keys:["no special treatment","prove value","long-term growth"]
-},
-{
- title:"Emergency Phrases",
- question:"Useful phrases during Zoom.",
- en:`Could you please repeat the question a little more slowly?
-
-As I understand, you are asking about my experience in site management. Is that correct?
-
-I know the technical process, but I may not know the exact English term. Let me explain it in simple words.
-
-That is a good question. Let me think for a moment.
-
-I am sorry, the connection was unstable. Could you repeat the last part?
-
-This is an important technical question. May I explain the main part in Russian and then summarize it in English?`,
- ru:`Не могли бы вы повторить вопрос немного медленнее?
-
-Насколько я понял, вы спрашиваете о моём опыте управления участком. Верно?
-
-Я знаю технический процесс, но могу не знать точного английского термина. Позвольте объяснить простыми словами.
-
-Это хороший вопрос. Позвольте немного подумать.
-
-Извините, связь была нестабильной. Можете повторить последнюю часть?
-
-Это важный технический вопрос. Могу я объяснить основную часть по-русски, а затем кратко подвести итог на английском?`,
- keys:["repeat slowly","clarify","simple words","connection"]
-}
+const f=(id,label,unit,def=0,step="any")=>({id,label,unit,def,step});
+const calculators=[
+{cat:"Земляные работы",name:"Котлован",desc:"Объём прямоугольного котлована.",fields:[f("l","Длина","м",12),f("w","Ширина","м",10),f("h","Глубина","м",3),f("k","Коэффициент разрыхления","",1.2)],formula:"V = L × B × H",calc:v=>({main:v.l*v.w*v.h,unit:"м³",extra:`Разрыхлённый грунт: ${(v.l*v.w*v.h*v.k).toFixed(2)} м³`})},
+{cat:"Земляные работы",name:"Траншея",desc:"Объём траншеи постоянного сечения.",fields:[f("l","Длина","м",50),f("w","Ширина","м",0.8),f("h","Глубина","м",1.5)],formula:"V = L × B × H",calc:v=>({main:v.l*v.w*v.h,unit:"м³"})},
+{cat:"Земляные работы",name:"Обратная засыпка",desc:"Разница между объёмом выемки и подземными конструкциями.",fields:[f("pit","Объём котлована","м³",360),f("struct","Объём конструкций","м³",120),f("k","Коэффициент уплотнения","",1.15)],formula:"V = (Vкотл − Vконстр) × K",calc:v=>({main:(v.pit-v.struct)*v.k,unit:"м³"})},
+{cat:"Земляные работы",name:"Рейсы самосвалов",desc:"Количество рейсов для вывоза грунта.",fields:[f("v","Объём грунта","м³",450),f("truck","Объём кузова","м³",20),f("load","Фактическая загрузка","%",90)],formula:"N = V / (Vкузова × загрузка)",calc:v=>({main:Math.ceil(v.v/(v.truck*v.load/100)),unit:"рейсов"})},
+{cat:"Основания",name:"Песчаная подготовка",desc:"Объём песка с учётом уплотнения.",fields:[f("s","Площадь","м²",120),f("h","Толщина","м",0.15),f("k","Коэффициент запаса","",1.15)],formula:"V = S × H × K",calc:v=>({main:v.s*v.h*v.k,unit:"м³"})},
+{cat:"Основания",name:"Щебёночная подготовка",desc:"Объём и масса щебня.",fields:[f("s","Площадь","м²",120),f("h","Толщина","м",0.12),f("rho","Насыпная плотность","т/м³",1.4)],formula:"V = S × H; M = V × ρ",calc:v=>({main:v.s*v.h,unit:"м³",extra:`Ориентировочная масса: ${(v.s*v.h*v.rho).toFixed(2)} т`})},
+{cat:"Основания",name:"Геотекстиль",desc:"Площадь полотна с запасом на нахлёсты.",fields:[f("l","Длина участка","м",20),f("w","Ширина участка","м",10),f("reserve","Запас","%",10)],formula:"S = L × B × (1 + запас)",calc:v=>({main:v.l*v.w*(1+v.reserve/100),unit:"м²"})},
+
+{cat:"Бетон",name:"Плита перекрытия",desc:"Объём бетона в монолитной плите.",fields:[f("l","Длина","м",10),f("w","Ширина","м",8),f("h","Толщина","м",0.2),f("reserve","Запас","%",3)],formula:"V = L × B × H",calc:v=>({main:v.l*v.w*v.h*(1+v.reserve/100),unit:"м³"})},
+{cat:"Бетон",name:"Фундаментная плита",desc:"Бетон фундаментной плиты.",fields:[f("l","Длина","м",12),f("w","Ширина","м",10),f("h","Толщина","м",0.3),f("reserve","Запас","%",3)],formula:"V = L × B × H",calc:v=>({main:v.l*v.w*v.h*(1+v.reserve/100),unit:"м³"})},
+{cat:"Бетон",name:"Ленточный фундамент",desc:"Объём бетона по общей длине ленты.",fields:[f("l","Общая длина","м",48),f("w","Ширина","м",0.4),f("h","Высота","м",0.8),f("reserve","Запас","%",3)],formula:"V = L × B × H",calc:v=>({main:v.l*v.w*v.h*(1+v.reserve/100),unit:"м³"})},
+{cat:"Бетон",name:"Колонны",desc:"Бетон в прямоугольных колоннах.",fields:[f("a","Сторона A","м",0.4),f("b","Сторона B","м",0.4),f("h","Высота","м",3),f("n","Количество","шт",20)],formula:"V = A × B × H × N",calc:v=>({main:v.a*v.b*v.h*v.n,unit:"м³"})},
+{cat:"Бетон",name:"Стены и диафрагмы",desc:"Бетон в монолитной стене за вычетом проёмов.",fields:[f("l","Длина","м",6),f("h","Высота","м",3),f("t","Толщина","м",0.2),f("open","Объём проёмов","м³",0)],formula:"V = L × H × T − Vпроёмов",calc:v=>({main:v.l*v.h*v.t-v.open,unit:"м³"})},
+{cat:"Бетон",name:"Балки и ригели",desc:"Объём бетона в балках.",fields:[f("l","Длина одной балки","м",6),f("b","Ширина","м",0.4),f("h","Высота","м",0.5),f("n","Количество","шт",8)],formula:"V = L × B × H × N",calc:v=>({main:v.l*v.b*v.h*v.n,unit:"м³"})},
+{cat:"Бетон",name:"Буронабивные сваи",desc:"Объём бетона в цилиндрических сваях.",fields:[f("d","Диаметр","м",0.5),f("h","Длина сваи","м",10),f("n","Количество","шт",20),f("reserve","Запас","%",5)],formula:"V = π × d² / 4 × H × N",calc:v=>({main:Math.PI*v.d*v.d/4*v.h*v.n*(1+v.reserve/100),unit:"м³"})},
+{cat:"Бетон",name:"Отмостка",desc:"Объём бетона по периметру здания.",fields:[f("p","Периметр","м",64),f("w","Ширина","м",1),f("h","Толщина","м",0.1)],formula:"V = P × B × H",calc:v=>({main:v.p*v.w*v.h,unit:"м³"})},
+
+{cat:"Арматура",name:"Масса по длине",desc:"Перевод длины арматуры в массу.",fields:[f("d","Диаметр","мм",12),f("l","Общая длина","м",1000),f("reserve","Запас","%",5)],formula:"m = d² / 162 × L",calc:v=>({main:v.d*v.d/162*v.l*(1+v.reserve/100),unit:"кг"})},
+{cat:"Арматура",name:"Арматура в плите",desc:"Две взаимно перпендикулярные сетки.",fields:[f("l","Длина плиты","м",10),f("w","Ширина плиты","м",8),f("step","Шаг","м",0.2),f("layers","Количество сеток","шт",2),f("d","Диаметр","мм",12),f("reserve","Запас","%",5)],formula:"Lобщ = [(B/шаг+1)×L + (L/шаг+1)×B] × сетки",calc:v=>{let len=((Math.floor(v.w/v.step)+1)*v.l+(Math.floor(v.l/v.step)+1)*v.w)*v.layers;return{main:len*v.d*v.d/162*(1+v.reserve/100),unit:"кг",extra:`Общая длина: ${len.toFixed(1)} м`}}},
+{cat:"Арматура",name:"Арматура в колонне",desc:"Продольные стержни и хомуты.",fields:[f("h","Высота","м",3),f("nlong","Продольных стержней","шт",8),f("dlong","Диаметр продольных","мм",20),f("step","Шаг хомутов","м",0.2),f("per","Длина одного хомута","м",1.64),f("dst","Диаметр хомута","мм",8)],formula:"M = Mпродольной + Mхомутов",calc:v=>{let a=v.h*v.nlong*v.dlong*v.dlong/162;let nh=Math.floor(v.h/v.step)+1;let b=nh*v.per*v.dst*v.dst/162;return{main:a+b,unit:"кг",extra:`Хомутов: ${nh} шт.`}}},
+{cat:"Арматура",name:"Арматура в стене",desc:"Две сетки вертикальных и горизонтальных стержней.",fields:[f("l","Длина стены","м",6),f("h","Высота","м",3),f("step","Шаг","м",0.2),f("layers","Количество сеток","шт",2),f("d","Диаметр","мм",12),f("reserve","Запас","%",5)],formula:"Lобщ = (горизонталь + вертикаль) × сетки",calc:v=>{let len=((Math.floor(v.h/v.step)+1)*v.l+(Math.floor(v.l/v.step)+1)*v.h)*v.layers;return{main:len*v.d*v.d/162*(1+v.reserve/100),unit:"кг",extra:`Длина: ${len.toFixed(1)} м`}}},
+{cat:"Арматура",name:"Нахлёсты",desc:"Добавочная длина на стыки стержней.",fields:[f("n","Количество стыков","шт",100),f("lap","Длина нахлёста","м",0.6),f("d","Диаметр","мм",12)],formula:"L = N × Lнахлёста",calc:v=>({main:v.n*v.lap*v.d*v.d/162,unit:"кг",extra:`Добавочная длина: ${(v.n*v.lap).toFixed(1)} м`})},
+{cat:"Арматура",name:"Вязальная проволока",desc:"Предварительный расход по массе арматуры.",fields:[f("steel","Масса арматуры","кг",5000),f("k","Расход проволоки","%",1)],formula:"Mпров = Mарм × %",calc:v=>({main:v.steel*v.k/100,unit:"кг"})},
+
+{cat:"Кладка",name:"Кирпич",desc:"Количество одинарного кирпича по объёму кладки.",fields:[f("l","Длина стены","м",10),f("h","Высота","м",3),f("t","Толщина","м",0.25),f("open","Площадь проёмов","м²",4.2),f("per","Кирпичей на 1 м³","шт",394),f("reserve","Запас","%",5)],formula:"N = [(L×H − Sпроёмов) × T] × расход",calc:v=>({main:Math.ceil((v.l*v.h-v.open)*v.t*v.per*(1+v.reserve/100)),unit:"шт."})},
+{cat:"Кладка",name:"Газоблок",desc:"Количество блоков по размерам стены и блока.",fields:[f("l","Длина стены","м",10),f("h","Высота","м",3),f("t","Толщина стены","м",0.2),f("open","Площадь проёмов","м²",4.2),f("bl","Длина блока","м",0.6),f("bh","Высота блока","м",0.3),f("bt","Толщина блока","м",0.2),f("reserve","Запас","%",5)],formula:"N = Vстены / Vблока",calc:v=>({main:Math.ceil(((v.l*v.h-v.open)*v.t)/(v.bl*v.bh*v.bt)*(1+v.reserve/100)),unit:"шт."})},
+{cat:"Кладка",name:"Кладочный раствор",desc:"Объём раствора по объёму кирпичной кладки.",fields:[f("v","Объём кладки","м³",20),f("k","Расход раствора","м³/м³",0.24),f("reserve","Запас","%",5)],formula:"Vр = Vкладки × K",calc:v=>({main:v.v*v.k*(1+v.reserve/100),unit:"м³"})},
+{cat:"Кладка",name:"Клей для газоблока",desc:"Количество мешков клея.",fields:[f("s","Площадь кладки","м²",100),f("rate","Расход","кг/м²",5),f("bag","Вес мешка","кг",25),f("reserve","Запас","%",5)],formula:"N = S × расход / масса мешка",calc:v=>({main:Math.ceil(v.s*v.rate*(1+v.reserve/100)/v.bag),unit:"мешков"})},
+
+{cat:"Опалубка",name:"Опалубка плиты",desc:"Низ и торцы плиты.",fields:[f("l","Длина","м",10),f("w","Ширина","м",8),f("h","Толщина","м",0.2)],formula:"S = L×B + 2(L+B)×H",calc:v=>({main:v.l*v.w+2*(v.l+v.w)*v.h,unit:"м²"})},
+{cat:"Опалубка",name:"Опалубка колонн",desc:"Боковая поверхность колонн.",fields:[f("a","Сторона A","м",0.4),f("b","Сторона B","м",0.4),f("h","Высота","м",3),f("n","Количество","шт",20)],formula:"S = 2(A+B) × H × N",calc:v=>({main:2*(v.a+v.b)*v.h*v.n,unit:"м²"})},
+{cat:"Опалубка",name:"Опалубка стен",desc:"Две стороны монолитной стены.",fields:[f("l","Длина","м",6),f("h","Высота","м",3),f("open","Проёмы с двух сторон","м²",0)],formula:"S = 2 × L × H − Sпроёмов",calc:v=>({main:2*v.l*v.h-v.open,unit:"м²"})},
+{cat:"Опалубка",name:"Фанера",desc:"Количество листов по площади опалубки.",fields:[f("s","Площадь опалубки","м²",200),f("fl","Длина листа","м",2.44),f("fw","Ширина листа","м",1.22),f("turns","Количество оборотов","раз",3),f("reserve","Запас","%",8)],formula:"N = S / площадь листа / обороты",calc:v=>({main:Math.ceil(v.s/(v.fl*v.fw)/v.turns*(1+v.reserve/100)),unit:"листов"})},
+
+{cat:"Отделка",name:"Штукатурка",desc:"Количество мешков по площади и толщине.",fields:[f("s","Площадь","м²",54),f("th","Толщина","мм",15),f("rate","Расход при 10 мм","кг/м²",9),f("bag","Вес мешка","кг",30),f("reserve","Запас","%",5)],formula:"M = S × расход × толщина/10",calc:v=>({main:Math.ceil(v.s*v.rate*(v.th/10)*(1+v.reserve/100)/v.bag),unit:"мешков"})},
+{cat:"Отделка",name:"Стяжка",desc:"Объём раствора для стяжки.",fields:[f("s","Площадь","м²",80),f("h","Толщина","м",0.06),f("reserve","Запас","%",5)],formula:"V = S × H",calc:v=>({main:v.s*v.h*(1+v.reserve/100),unit:"м³"})},
+{cat:"Отделка",name:"Плитка",desc:"Плитка, упаковки и стоимость.",fields:[f("s","Площадь поверхности","м²",48),f("exclude","Исключаемая площадь","м²",0),f("pl","Длина плитки","м",0.6),f("pw","Ширина плитки","м",0.6),f("pack","Плиток в упаковке","шт",4),f("reserve","Запас","%",10),f("price","Цена упаковки","₽",2500)],formula:"N = S / Sплитки × запас",calc:v=>{let n=Math.ceil((v.s-v.exclude)/(v.pl*v.pw)*(1+v.reserve/100));let packs=Math.ceil(n/v.pack);return{main:n,unit:"плиток",extra:`Упаковок: ${packs}; стоимость: ${(packs*v.price).toLocaleString("ru-RU")} ₽`}}},
+{cat:"Отделка",name:"Ламинат",desc:"Количество упаковок напольного покрытия.",fields:[f("s","Площадь","м²",50),f("pack","Площадь в упаковке","м²",2.2),f("reserve","Запас","%",7),f("price","Цена упаковки","₽",1800)],formula:"N = S × запас / площадь упаковки",calc:v=>{let n=Math.ceil(v.s*(1+v.reserve/100)/v.pack);return{main:n,unit:"упаковок",extra:`Стоимость: ${(n*v.price).toLocaleString("ru-RU")} ₽`}}},
+{cat:"Отделка",name:"Краска",desc:"Объём краски по площади, слоям и укрывистости.",fields:[f("s","Площадь","м²",120),f("layers","Количество слоёв","",2),f("cover","Укрывистость","м²/л",10),f("reserve","Запас","%",7)],formula:"V = S × слои / укрывистость",calc:v=>({main:v.s*v.layers/v.cover*(1+v.reserve/100),unit:"л"})},
+{cat:"Отделка",name:"Грунтовка",desc:"Расход грунтовки.",fields:[f("s","Площадь","м²",120),f("rate","Расход","л/м²",0.12),f("layers","Количество слоёв","",1),f("reserve","Запас","%",5)],formula:"V = S × расход × слои",calc:v=>({main:v.s*v.rate*v.layers*(1+v.reserve/100),unit:"л"})},
+{cat:"Отделка",name:"Гипсокартон",desc:"Количество листов для перегородки.",fields:[f("l","Длина перегородки","м",8),f("h","Высота","м",3),f("sides","Количество сторон","",2),f("layers","Слоёв на сторону","",1),f("sheet","Площадь листа","м²",3),f("reserve","Запас","%",10)],formula:"N = L × H × стороны × слои / Sлиста",calc:v=>({main:Math.ceil(v.l*v.h*v.sides*v.layers/v.sheet*(1+v.reserve/100)),unit:"листов"})},
+
+{cat:"Фасад и кровля",name:"Утеплитель фасада",desc:"Площадь и количество плит утеплителя.",fields:[f("p","Периметр здания","м",64),f("h","Высота","м",9),f("open","Площадь проёмов","м²",80),f("sl","Длина плиты","м",1.2),f("sw","Ширина плиты","м",0.6),f("reserve","Запас","%",7)],formula:"S = P × H − Sпроёмов",calc:v=>{let s=(v.p*v.h-v.open)*(1+v.reserve/100);return{main:s,unit:"м²",extra:`Плит: ${Math.ceil(s/(v.sl*v.sw))} шт.`}}},
+{cat:"Фасад и кровля",name:"Фасадные дюбели",desc:"Количество дюбелей по площади.",fields:[f("s","Площадь утепления","м²",500),f("rate","Расход","шт/м²",6),f("reserve","Запас","%",5)],formula:"N = S × расход",calc:v=>({main:Math.ceil(v.s*v.rate*(1+v.reserve/100)),unit:"шт."})},
+{cat:"Фасад и кровля",name:"Кровельная мембрана",desc:"Плоскость кровли и парапеты.",fields:[f("l","Длина кровли","м",30),f("w","Ширина кровли","м",20),f("ph","Высота парапета","м",0.6),f("reserve","Запас","%",10)],formula:"S = L×B + 2(L+B)×Hпарапета",calc:v=>({main:(v.l*v.w+2*(v.l+v.w)*v.ph)*(1+v.reserve/100),unit:"м²"})},
+{cat:"Фасад и кровля",name:"Водосточные кронштейны",desc:"Количество кронштейнов для желобов.",fields:[f("l","Общая длина желобов","м",40),f("step","Шаг кронштейнов","м",0.6)],formula:"N = L / шаг + 1",calc:v=>({main:Math.ceil(v.l/v.step)+1,unit:"шт."})}
 ];
 
-let current = 0;
-let quick = false;
 
-const nav = document.getElementById('nav');
-const content = document.getElementById('content');
-const title = document.getElementById('sectionTitle');
-const progress = document.getElementById('progress');
-const search = document.getElementById('search');
+function learningInfo(c){
+ const info={"Котлован":{"what":"Котлован — это временная выемка в грунте под фундамент, подземный этаж, паркинг или инженерное сооружение. По сути, это первое большое «помещение» здания, только пока ещё без стен и ниже уровня земли.","why":"Сначала длина умножается на ширину — так получаем площадь дна. Затем площадь умножается на глубину — получается объём грунта, который необходимо вынуть.","symbols":[["V","объём котлована, м³"],["L","длина котлована, м"],["B","ширина котлована, м"],["H","средняя глубина котлована, м"],["K","коэффициент разрыхления грунта"]],"tip":"Если отметки дна разные или есть откосы, простой прямоугольник уже даёт грубую оценку. Такой котлован лучше разбить на участки либо считать как усечённую призму."},"Траншея":{"what":"Траншея — узкая протяжённая выемка для трубопровода, кабеля, дренажа или ленточного фундамента. Она похожа на длинный канал в грунте.","why":"Площадь поперечного сечения траншеи равна ширине, умноженной на глубину. Умножая это сечение на длину, получаем общий объём разработки.","symbols":[["V","объём траншеи, м³"],["L","длина траншеи, м"],["B","средняя ширина, м"],["H","средняя глубина, м"]],"tip":"Для трубопровода ширина траншеи обычно больше диаметра трубы: нужен рабочий зазор, подготовка основания и место для уплотнения обратной засыпки."},"Обратная засыпка":{"what":"Обратная засыпка возвращает грунт или привозной материал в свободное пространство вокруг фундамента, подвала или трубы после завершения скрытых работ.","why":"Котлован уже имеет известный объём. Часть этого пространства заняли бетон, стены и коммуникации. Значит, засыпать нужно только оставшийся свободный объём, увеличенный на поправку для уплотнения.","symbols":[["Vз","закупочный объём засыпки, м³"],["Vк","объём котлована или траншеи, м³"],["Vконстр","объём подземных конструкций, м³"],["K","коэффициент уплотнения и потерь"]],"tip":"Не засыпайте пазухи строительным мусором «для экономии». Такая экономия часто возвращается просадкой отмостки, провалами покрытия и повреждением гидроизоляции."},"Рейсы самосвалов":{"what":"Этот расчёт превращает кубометры грунта в понятную строительной логистике величину — количество рейсов машин.","why":"Общий объём делится не просто на паспортный кузов, а на его реально используемую вместимость. Последний неполный рейс всё равно считается целым.","symbols":[["N","необходимое количество рейсов"],["V","общий объём материала, м³"],["Vк","паспортный объём кузова, м³"],["Kз","доля фактической загрузки кузова"]],"tip":"Для мокрой глины и щебня ограничением часто становится грузоподъёмность, а не геометрический объём кузова. Проверяйте и кубы, и тонны."},"Песчаная подготовка":{"what":"Песчаная подготовка выравнивает основание, помогает распределять давление и создаёт удобный слой для точной отметки под фундаментом или полом.","why":"Площадь участка показывает, сколько квадратных метров нужно закрыть. Умножение на толщину превращает площадь в объём слоя, а коэффициент учитывает уплотнение и неизбежные потери.","symbols":[["V","объём песка к закупке, м³"],["S","площадь основания, м²"],["H","толщина уплотнённого слоя, м"],["K","коэффициент запаса и уплотнения"]],"tip":"Слой толщиной 200 мм лучше уплотнять послойно, например по 100 мм. Толстый рыхлый слой сверху может выглядеть плотным, а внутри остаться слабым."},"Щебёночная подготовка":{"what":"Щебёночная подготовка создаёт более жёсткий и дренирующий слой под плитой, фундаментом, дорогой или площадкой.","why":"Площадь умножается на толщину — получаем кубометры. Чтобы перейти к тоннам, объём умножается на насыпную плотность конкретной фракции.","symbols":[["V","объём щебня, м³"],["S","площадь слоя, м²"],["H","толщина уплотнённого слоя, м"],["M","масса щебня, т"],["ρ","насыпная плотность, т/м³"]],"tip":"Одинаковые 10 м³ щебня разных фракций могут весить по-разному. Для заказа в тоннах используйте данные именно вашего поставщика."},"Геотекстиль":{"what":"Геотекстиль разделяет грунт и щебень, не позволяя слоям перемешиваться. Он работает как фильтр и тонкая граница между материалами, а не как волшебное усиление слабого грунта.","why":"Базовая площадь равна длине, умноженной на ширину. Сверху добавляется запас на нахлёсты соседних полотен, повороты и заведение на края.","symbols":[["S","площадь геотекстиля к закупке, м²"],["L","длина участка, м"],["B","ширина участка, м"],["K","запас на нахлёсты и подрезку"]],"tip":"Сначала продумайте раскладку рулонов. Иногда правильное направление полотен экономит больше материала, чем уменьшение процента запаса."},"Плита перекрытия":{"what":"Плита перекрытия — горизонтальная несущая конструкция между этажами. Она принимает людей, перегородки, мебель и оборудование, затем передаёт нагрузку на колонны, стены или балки.","why":"Длина на ширину дают площадь плиты. Площадь на толщину даёт объём бетонного тела. Именно поэтому формула состоит из трёх размеров.","symbols":[["V","объём бетона, м³"],["L","длина плиты, м"],["B","ширина плиты, м"],["H","толщина плиты, м"]],"tip":"Главная бытовая ошибка — ввести 200 вместо 0,20. Миллиметры обязательно переводятся в метры. Лестничные и лифтовые проёмы вычитайте отдельно."},"Фундаментная плита":{"what":"Фундаментная плита лежит под зданием как большая железобетонная платформа и распределяет нагрузку на значительную площадь грунта.","why":"Её основной объём считается как объём прямоугольного тела: площадь основания умножается на толщину.","symbols":[["V","объём бетона, м³"],["L","длина плиты, м"],["B","ширина плиты, м"],["H","толщина плиты, м"]],"tip":"Не смешивайте в одной строке плиту, подбетонку, рёбра и утолщения. Их лучше посчитать отдельно и затем сложить — так расчёт легче проверить."},"Ленточный фундамент":{"what":"Ленточный фундамент идёт непрерывной полосой под несущими стенами и передаёт их нагрузку на основание.","why":"Ширина на высоту дают площадь поперечного сечения ленты. Если протянуть это сечение по всей длине, получится объём бетона.","symbols":[["V","объём бетона, м³"],["L","суммарная длина ленты, м"],["B","ширина ленты, м"],["H","высота ленты, м"]],"tip":"На пересечениях внутренних и наружных лент легко дважды посчитать один и тот же бетон. Составьте простую осевую схему и проверяйте узлы пересечения."},"Колонны":{"what":"Колонна — вертикальная опора каркаса. Она собирает нагрузку с перекрытий и балок и передаёт её вниз, к фундаменту.","why":"Две стороны колонны образуют площадь её прямоугольного сечения. Площадь умножается на высоту, а затем на количество одинаковых колонн.","symbols":[["V","общий объём бетона, м³"],["A","первая сторона колонны, м"],["B","вторая сторона колонны, м"],["H","высота бетонирования, м"],["N","количество колонн"]],"tip":"Габарит от пола до потолка и фактическая высота бетонирования могут отличаться из-за плиты и рабочих швов. Смотрите конструктивную схему."},"Стены и диафрагмы":{"what":"Монолитная стена может быть несущей или ограждающей. Диафрагма жёсткости — особая несущая стена, которая стабилизирует здание при ветре и сейсмических воздействиях.","why":"Длина и высота дают площадь одной стороны стены. Умножение на толщину превращает её в объём. Объём дверных и технологических проёмов вычитается.","symbols":[["V","чистый объём бетона, м³"],["L","длина стены, м"],["H","высота стены, м"],["T","толщина стены, м"],["Vпр","объём проёмов, м³"]],"tip":"Не называйте любую монолитную стену диафрагмой. Диафрагма — элемент расчётной схемы здания, и её назначение определяется проектировщиком."},"Балки и ригели":{"what":"Балка и ригель работают как горизонтальные несущие элементы: принимают нагрузку от плиты и передают её на опоры. В практике названия зависят от конструктивной схемы, но принцип расчёта объёма одинаков.","why":"Ширина на высоту дают площадь сечения элемента. Она умножается на длину и количество одинаковых балок.","symbols":[["V","общий объём бетона, м³"],["L","длина одного элемента, м"],["B","ширина сечения, м"],["H","высота сечения, м"],["N","количество элементов"]],"tip":"Если балка входит в толщину уже посчитанной плиты, отделите выступающую часть, иначе бетон будет задвоен."},"Буронабивные сваи":{"what":"Буронабивная свая формируется прямо в пробурённой скважине. Она передаёт нагрузку через боковую поверхность и пяту на более прочные слои грунта.","why":"Круглое сечение сваи имеет площадь πd²/4. Умножая эту площадь на длину, получаем объём цилиндра, а затем умножаем на число свай.","symbols":[["V","объём бетона, м³"],["π","число 3,1416"],["d","диаметр сваи, м"],["H","длина сваи, м"],["N","количество свай"]],"tip":"Теоретический цилиндр почти всегда чуть экономнее реальной скважины. Контролируйте фактический расход по каждой свае — перерасход иногда первым показывает проблему бурения."},"Отмостка":{"what":"Отмостка — водоотводящая полоса вокруг здания. Её задача — не дать дождевой и талой воде постоянно мочить грунт рядом с фундаментом.","why":"Периметр здания умножается на ширину полосы — получается площадь. Площадь умножается на толщину бетонного слоя — получается объём.","symbols":[["V","объём бетона, м³"],["P","рабочий периметр, м"],["B","ширина отмостки, м"],["H","толщина бетона, м"]],"tip":"Главное в отмостке не только бетон, а уклон, деформационные швы и подготовленное основание. Горизонтальная отмостка — дорогой тротуар, но плохой водоотвод."},"Масса по длине":{"what":"Расчёт переводит метры арматурных стержней в килограммы и тонны — язык закупки, ведомостей и приёмки металла.","why":"Масса зависит от площади круглого сечения стержня и плотности стали. Площадь растёт как квадрат диаметра, отсюда практическая формула d²/162.","symbols":[["m","масса одного или всех стержней, кг"],["d","номинальный диаметр арматуры, мм"],["L","общая длина арматуры, м"],["162","округлённый коэффициент из плотности стали и формулы площади круга"]],"tip":"Диаметр растёт линейно, а масса — по квадрату. Поэтому замена Ø12 на Ø16 увеличит вес метра примерно не на 33%, а на 78%."},"Арматура в плите":{"what":"Арматура помогает плите воспринимать растяжение, с которым бетон самостоятельно справляется плохо. Обычно стержни идут в двух направлениях и могут образовывать верхнюю и нижнюю сетки.","why":"Размер поперёк стержней делится на шаг — так определяется их количество. Количество умножается на длину каждого стержня, затем обе стороны и все сетки складываются.","symbols":[["Lобщ","суммарная длина стержней, м"],["L","длина плиты, м"],["B","ширина плиты, м"],["s","шаг арматуры, м"],["d","диаметр стержней, мм"]],"tip":"Основная сетка — ещё не вся арматура плиты. Отдельно идут усиления над колоннами, по краям, вокруг проёмов, нахлёсты и поддерживающие элементы."},"Арматура в колонне":{"what":"Каркас колонны состоит из продольных рабочих стержней и поперечных хомутов. Вместе они удерживают геометрию каркаса и обеспечивают совместную работу бетона и стали.","why":"Продольная часть считается по числу стержней и их длине. Хомуты считаются по высоте и шагу, после чего обе длины переводятся в массу по диаметрам.","symbols":[["M","общая масса каркаса, кг"],["H","высота каркаса, м"],["N","число продольных стержней"],["s","шаг хомутов, м"],["Lх","развёрнутая длина одного хомута, м"]],"tip":"Длина хомута — это не просто периметр колонны: нужно учитывать защитный слой, диаметр стержней и длину загибов."},"Арматура в стене":{"what":"Вертикальная и горизонтальная арматура монолитной стены образует пространственную систему, которая воспринимает растяжение, ограничивает раскрытие трещин и связывает конструкцию.","why":"По каждому направлению количество стержней определяется делением размера стены на шаг. Затем считается длина одной или двух сеток и переводится в массу.","symbols":[["Lобщ","суммарная длина арматуры, м"],["L","длина стены, м"],["H","высота стены, м"],["s","шаг стержней, м"],["d","диаметр, мм"]],"tip":"В простом калькуляторе нет краевых элементов, обрамления проёмов и выпусков. Для диафрагм именно эти зоны могут давать существенную долю тоннажа."},"Нахлёсты":{"what":"Нахлёст соединяет два стержня на участке, где они работают совместно и передают усилие через сцепление с бетоном.","why":"Каждый стык добавляет к ведомости определённую длину металла. Число стыков умножается на проектную длину одного нахлёста.","symbols":[["Lдоп","дополнительная длина арматуры, м"],["N","количество стыков"],["Lн","длина одного нахлёста, м"],["d","диаметр арматуры, мм"]],"tip":"Фраза «всегда 40 диаметров» слишком грубая. Длина соединения зависит от класса бетона, арматуры, напряжённой зоны и проектного решения."},"Вязальная проволока":{"what":"Вязальная проволока не усиливает железобетон напрямую. Она удерживает стержни в нужном положении до и во время бетонирования.","why":"Для быстрой закупки массу проволоки оценивают как небольшой процент от массы арматуры. Это эмпирический, а не геометрический расчёт.","symbols":[["Mп","масса вязальной проволоки, кг"],["Mа","масса арматуры, кг"],["K","принятый процент расхода"]],"tip":"На густых сетках и ручной двойной вязке расход выше. Для точности можно считать число узлов и длину проволоки на один узел."},"Кирпич":{"what":"Кирпичная кладка — это не сплошной объём керамики: часть стены занимают растворные швы. Поэтому расход кирпича считают по готовой кладке с учётом формата материала.","why":"Из площади стены вычитаются проёмы, остаток умножается на толщину — получается объём кладки. Затем объём умножается на расход кирпича на 1 м³.","symbols":[["N","количество кирпичей, шт."],["L","длина стены, м"],["H","высота стены, м"],["T","толщина кладки, м"],["Sпр","площадь проёмов, м²"]],"tip":"Всегда уточняйте формат: одинарный, полуторный, двойной и облицовочный кирпич дают разное количество штук на тот же объём стены."},"Газоблок":{"what":"Газоблок крупнее кирпича и обычно укладывается на тонкий клеевой шов. Расчёт ведётся через объём стены и объём одного блока.","why":"Чистая площадь стены умножается на толщину — получается объём. Деление на объём одного блока показывает теоретическое количество блоков.","symbols":[["N","количество блоков, шт."],["Vст","чистый объём стены, м³"],["Vбл","объём одного блока, м³"],["L,H,T","размеры стены, м"],["l,h,t","размеры блока, м"]],"tip":"Не путайте размеры блока при вводе. Толщина стены должна совпадать с той гранью блока, которая идёт поперёк кладки."},"Кладочный раствор":{"what":"Кладочный раствор заполняет горизонтальные и вертикальные швы, выравнивает кирпичи и передаёт давление от ряда к ряду.","why":"Объём швов связан с общим объёмом кладки, поэтому для предварительного расчёта используется удельный расход раствора на 1 м³ стены.","symbols":[["Vр","объём раствора, м³"],["Vк","объём кирпичной кладки, м³"],["K","расход раствора на 1 м³ кладки"]],"tip":"Пустотелый кирпич способен «съесть» больше раствора, особенно при слишком подвижной смеси и неаккуратной кладке."},"Клей для газоблока":{"what":"Клей формирует тонкий шов между газоблоками. Тонкий шов уменьшает мостики холода и делает геометрию кладки точнее.","why":"Площадь кладки умножается на удельный расход сухой смеси. Полученная масса делится на вес одного мешка и округляется вверх.","symbols":[["N","количество мешков"],["S","площадь кладки, м²"],["R","расход клея, кг/м²"],["Mм","масса одного мешка, кг"]],"tip":"Кривой первый ряд нельзя лечить толстым слоем клея. Его выводят цементно-песчаным раствором, иначе весь последующий расход поползёт вверх."},"Опалубка плиты":{"what":"Опалубка плиты — временная форма и опорная система, которая держит свежий бетон до набора необходимой прочности.","why":"Сначала считается нижняя горизонтальная поверхность плиты. Затем добавляется площадь наружных торцов по периметру.","symbols":[["S","площадь контакта опалубки с бетоном, м²"],["L","длина плиты, м"],["B","ширина плиты, м"],["H","толщина плиты, м"]],"tip":"Площадь фанеры и комплект опалубки — не одно и то же. Для реальной комплектации ещё нужны балки, стойки, треноги, унивилки и проверка нагрузок."},"Опалубка колонн":{"what":"Опалубка колонны формирует её вертикальные грани и воспринимает боковое давление свежей бетонной смеси.","why":"Периметр прямоугольного сечения умножается на высоту. Затем площадь одной колонны умножается на их количество.","symbols":[["S","площадь опалубки, м²"],["A,B","стороны сечения колонны, м"],["H","высота колонны, м"],["N","количество колонн"]],"tip":"Чем быстрее подаётся бетон и чем он подвижнее, тем выше давление на щиты. Площадь показывает объём работ, но не заменяет расчёт прочности опалубки."},"Опалубка стен":{"what":"Стеновая опалубка состоит из двух противостоящих плоскостей, между которыми формируется монолитная стена.","why":"Площадь одной стороны равна длине на высоту. Поскольку сторон две, результат удваивается, а крупные проёмы вычитаются.","symbols":[["S","площадь опалубки, м²"],["L","длина стены, м"],["H","высота стены, м"],["Sпр","суммарная площадь проёмов с двух сторон, м²"]],"tip":"Не забудьте торцы стен и откосы проёмов: они малы по площади, но любят внезапно появляться в конце ведомости."},"Фанера":{"what":"Ламинированная фанера создаёт гладкую рабочую поверхность опалубки и может использоваться повторно.","why":"Площадь опалубки делится на площадь листа. Если лист реально выдержит несколько оборотов, потребность делится на число повторных применений.","symbols":[["N","необходимое количество листов"],["S","суммарная площадь опалубки, м²"],["Sл","площадь одного листа, м²"],["O","плановое число оборотов"]],"tip":"Не закладывайте фантастические обороты. Отверстия, резка, гвозди и грубый демонтаж быстро превращают хорошую фанеру в дорогие обрезки."},"Штукатурка":{"what":"Штукатурка исправляет геометрию стены и создаёт ровное основание под шпаклёвку, плитку или окраску.","why":"Производитель указывает расход при определённой толщине. Поэтому площадь умножается на расход и на отношение фактической толщины к базовой.","symbols":[["M","масса сухой смеси, кг"],["S","площадь штукатурки, м²"],["R","расход при базовой толщине, кг/м²"],["H","средняя толщина слоя, мм"],["N","число мешков"]],"tip":"Измерьте стену правилом или лазером. Расчёт по «идеальным» 10 мм на кривом основании — классический способ заказать смесь дважды."},"Стяжка":{"what":"Стяжка формирует ровное и прочное основание пола, распределяет нагрузку и закрывает трубы или кабели, если это предусмотрено конструкцией.","why":"Площадь пола умножается на среднюю толщину слоя — получается объём раствора.","symbols":[["V","объём стяжки, м³"],["S","площадь пола, м²"],["H","средняя толщина, м"]],"tip":"При перепадах основания используйте среднюю толщину по нивелировке. Разница даже в 10 мм на 500 м² даёт дополнительные 5 м³ раствора."},"Плитка":{"what":"Калькулятор плитки помогает перевести площадь пола или стены в штуки, упаковки и деньги.","why":"Чистая площадь делится на площадь одной плитки. Затем добавляется запас на подрезку, раскладку, бой и возможный будущий ремонт.","symbols":[["N","количество плиток, шт."],["S","чистая площадь облицовки, м²"],["l","длина плитки, м"],["b","ширина плитки, м"],["K","запас, %"]],"tip":"Сохраните несколько целых плиток после ремонта. Через годы тот же оттенок и калибр может уже не продаваться."},"Ламинат":{"what":"Ламинат продаётся упаковками, каждая из которых закрывает указанную производителем площадь пола.","why":"Площадь помещения увеличивается на запас и делится на площадь покрытия в одной упаковке. Результат округляется вверх.","symbols":[["N","количество упаковок"],["S","площадь помещения, м²"],["Sуп","площадь ламината в упаковке, м²"],["K","запас на подрезку, %"]],"tip":"При длинных узких помещениях и диагональной укладке отходов больше. Направление доски лучше определить до закупки."},"Краска":{"what":"Краска создаёт финишное декоративное и защитное покрытие. Одного слоя обычно недостаточно для ровного цвета и плотности.","why":"Площадь умножается на число слоёв. Полученная суммарная площадь окрашивания делится на укрывистость одного литра.","symbols":[["V","объём краски, л"],["S","площадь поверхности, м²"],["N","число слоёв"],["P","укрывистость, м²/л"]],"tip":"Цифра на банке обычно получена в хороших условиях. Шероховатая стена, контрастный старый цвет и валик с длинным ворсом увеличат расход."},"Грунтовка":{"what":"Грунтовка связывает пыль, регулирует впитывание и помогает следующему слою надёжно сцепиться с основанием.","why":"Площадь умножается на расход состава на 1 м² и на количество проходов.","symbols":[["V","объём грунтовки, л"],["S","площадь основания, м²"],["R","расход на один слой, л/м²"],["N","количество слоёв"]],"tip":"Грунтовка не должна превращаться в блестящую стеклянную плёнку, если система этого не требует. Избыток иногда ухудшает сцепление так же, как недостаток."},"Гипсокартон":{"what":"Гипсокартон применяется для лёгких перегородок, облицовок и потолков. Количество листов зависит не только от площади, но и от числа слоёв с каждой стороны.","why":"Длина на высоту дают площадь одной стороны. Она умножается на число сторон и слоёв, затем делится на площадь листа.","symbols":[["N","количество листов"],["L","длина перегородки, м"],["H","высота, м"],["Sл","площадь одного листа, м²"]],"tip":"Раскрой важнее голой площади. Разложите листы по высоте помещения: иногда другой формат листа заметно уменьшает горизонтальные швы и отходы."},"Утеплитель фасада":{"what":"Фасадный утеплитель снижает теплопотери через наружные стены и помогает держать внутреннюю поверхность стены теплее.","why":"Периметр на высоту дают общую площадь фасадов. Из неё вычитаются проёмы, после чего добавляется запас на резку и доборные участки.","symbols":[["S","площадь утепления, м²"],["P","периметр здания, м"],["H","высота фасада, м"],["Sпр","площадь окон и дверей, м²"]],"tip":"Откосы, цоколь и противопожарные рассечки могут выполняться другим материалом. Не смешивайте всё в одну площадь без разбивки."},"Фасадные дюбели":{"what":"Фасадные дюбели дополнительно фиксируют плиты утеплителя к стене и помогают системе выдерживать ветровое воздействие.","why":"Площадь утепления умножается на принятое количество креплений на 1 м².","symbols":[["N","количество дюбелей, шт."],["S","площадь утепления, м²"],["R","расход креплений, шт/м²"]],"tip":"Один средний расход на весь фасад — упрощение. Углы и верхние зоны здания часто требуют более плотной схемы крепления."},"Кровельная мембрана":{"what":"Мембрана — основной водонепроницаемый слой плоской кровли. Она закрывает горизонтальную поверхность и поднимается на парапеты и примыкания.","why":"К площади кровли добавляется площадь вертикальных участков парапета, а затем запас на сварные нахлёсты, раскрой и узлы.","symbols":[["S","площадь мембраны к закупке, м²"],["L","длина кровли, м"],["B","ширина кровли, м"],["Hп","высота заведения на парапет, м"]],"tip":"На кровле материал съедают не квадратные метры, а детали: воронки, углы, шахты, трубы и переходы. Чем сложнее план, тем менее честен простой процент запаса."},"Водосточные кронштейны":{"what":"Кронштейны удерживают желоб и формируют его уклон к водоприёмной воронке.","why":"Длина желоба делится на допустимый шаг между креплениями. Дополнительная единица нужна для закрепления конца ряда.","symbols":[["N","количество кронштейнов, шт."],["L","общая длина желобов, м"],["s","шаг установки кронштейнов, м"]],"tip":"У воронок, углов и соединителей часто ставят дополнительные крепления. Их лучше добавлять по схеме, а не надеяться только на равномерный шаг."}};
+ return info[c.name]||{what:"Этот модуль объясняет смысл строительного расчёта и помогает определить предварительную потребность в материале.",why:"Формула связывает геометрию конструкции или удельный расход с итоговым количеством.",symbols:c.fields.map(z=>[z.id.toUpperCase(),z.label+(z.unit?`, ${z.unit}`:"")]),tip:"Проверяйте единицы измерения и сопоставляйте результат с проектом."};
+}
 
-function renderNav(filter=''){
-  nav.innerHTML='';
-  const q=filter.toLowerCase();
-  sections.forEach((s,i)=>{
-    const hay=(s.title+' '+s.question+' '+s.en+' '+s.ru).toLowerCase();
-    if(q && !hay.includes(q)) return;
-    const b=document.createElement('button');
-    b.textContent=(i+1)+'. '+s.title;
-    b.className=i===current?'active':'';
-    b.onclick=()=>{current=i;render(); if(innerWidth<850) toggleMenu(false);}
-    nav.appendChild(b);
-  });
+const sidebar=document.getElementById("sidebar"), content=document.getElementById("content"), search=document.getElementById("search");
+const cats=[...new Set(calculators.map(x=>x.cat))];
+function renderMenu(filter=""){
+ sidebar.innerHTML="";
+ cats.forEach(cat=>{
+   const list=calculators.filter(x=>x.cat===cat && x.name.toLowerCase().includes(filter.toLowerCase()));
+   if(!list.length)return;
+   const wrap=document.createElement("div");wrap.className="cat";
+   wrap.innerHTML=`<div class="cat-title">${cat}<span>${list.length}</span></div><div class="items"></div>`;
+   const items=wrap.querySelector(".items");
+   list.forEach(calc=>{
+     const b=document.createElement("button");b.className="item";b.textContent=calc.name;
+     b.onclick=()=>openCalc(calc,b);items.appendChild(b);
+   });
+   sidebar.appendChild(wrap);
+ });
 }
-function render(){
-  const s=sections[current];
-  title.textContent=s.title;
-  progress.textContent=`Карточка ${current+1} из ${sections.length}`;
-  content.innerHTML=`
-    <article class="card">
-      <div class="card-head">
-        <div><div class="question">${s.question}</div><h3>${s.title}</h3></div>
-        <span class="tag">READY</span>
-      </div>
-      <div class="card-body">
-        <div class="en">${formatText(s.en)}</div>
-        <div class="ru">${formatText(s.ru)}</div>
-        ${s.warning?`<div class="warning">${s.warning}</div>`:''}
-        <div class="keywords">${s.keys.map(k=>`<span class="chip">${k}</span>`).join('')}</div>
-        <div class="card-controls">
-          <button class="btn tiny primary" onclick="speakCurrent()">▶ Озвучить английский</button>
-          <button class="btn tiny" onclick="copyEnglish()">Копировать EN</button>
-          <button class="btn tiny" onclick="copyRussian()">Копировать RU</button>
-        </div>
-      </div>
-    </article>`;
-  renderNav(search.value);
+
+function defaultExample(c){
+ const v={}; c.fields.forEach(x=>v[x.id]=Number(x.def)||0);
+ const r=c.calc(v);
+ const inputs=c.fields.slice(0,6).map(x=>`${x.label}: ${x.def}${x.unit?` ${x.unit}`:""}`).join("; ");
+ const main=typeof r.main==="number"?Number(r.main.toFixed(2)).toLocaleString("ru-RU"):r.main;
+ return {inputs,result:`${main} ${r.unit}`,extra:r.extra||""};
 }
-function formatText(t){return t.trim().split(/\n+/).map(x=>`<p>${x}</p>`).join('')}
-function nextCard(){current=(current+1)%sections.length;render();window.scrollTo({top:0,behavior:'smooth'})}
-function prevCard(){current=(current-1+sections.length)%sections.length;render();window.scrollTo({top:0,behavior:'smooth'})}
-function toggleQuick(){
-  quick=!quick; document.body.classList.toggle('quick',quick);
-  if(quick) document.getElementById('sidebar').classList.remove('open');
+
+function openCalc(c,btn){
+ document.querySelectorAll(".item").forEach(x=>x.classList.remove("active")); if(btn)btn.classList.add("active");
+ const e=learningInfo(c); const ex=defaultExample(c); const rows=e.symbols.map(x=>`<tr><td>${x[0]}</td><td>${x[1]}</td></tr>`).join("");
+ content.innerHTML=`<h2 class="calc-title">${c.name}</h2><p class="desc">${c.desc}</p>
+ <div class="edu-card"><h3>Что это и зачем нужно</h3><p>${e.what}</p><h4>Почему формула работает</h4><p>${e.why}</p>
+ <h4>Расшифровка обозначений</h4><table class="symbols">${rows}</table>
+ <div class="formula"><b>Основная формула:</b> ${c.formula}</div><div class="example-box"><b>Разбор на готовом примере</b><div class="example-data">${ex.inputs}</div><div class="example-result">Ответ: ${ex.result}</div>${ex.extra?`<div class="example-data">${ex.extra}</div>`:""}</div><div class="insight"><b>Практический совет:</b> ${e.tip}</div></div>
+ <div class="section-label">Рассчитайте свои данные</div>
+ <div class="form-grid">${c.fields.map(x=>`<div class="field"><label>${x.label}${x.unit?` (${x.unit})`:""}</label><input id="${x.id}" type="number" value="${x.def}" step="${x.step}"></div>`).join("")}</div>
+ <div class="actions"><button class="primary" id="calcBtn">РАССЧИТАТЬ</button><button class="secondary" id="resetBtn">Сбросить</button></div>
+ <div class="result" id="result"></div><div class="note">Результат является предварительным расчётом объёма материалов. Проверяйте исходные данные и проектные решения.</div>`;
+ document.getElementById("calcBtn").onclick=()=>{const v={};c.fields.forEach(x=>v[x.id]=parseFloat(document.getElementById(x.id).value)||0);const r=c.calc(v);const box=document.getElementById("result");box.style.display="block";const main=typeof r.main==="number"?Number(r.main.toFixed(2)).toLocaleString("ru-RU"):r.main;box.innerHTML=`<div>Итог</div><strong>${main} ${r.unit}</strong>${r.extra?`<div style="margin-top:8px;color:#c9d6df">${r.extra}</div>`:""}`;};
+ document.getElementById("resetBtn").onclick=()=>openCalc(c,btn); window.scrollTo({top:0,behavior:"smooth"});
 }
-function speakCurrent(){
-  speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(sections[current].en);
-  u.lang='en-US';u.rate=.86;u.pitch=1;
-  speechSynthesis.speak(u);
-}
-function copyEnglish(){navigator.clipboard.writeText(sections[current].en)}
-function copyRussian(){navigator.clipboard.writeText(sections[current].ru)}
-function toggleMenu(force){
-  const sb=document.getElementById('sidebar');
-  if(force===false) sb.classList.remove('open'); else sb.classList.toggle('open');
-}
-search.addEventListener('input',e=>renderNav(e.target.value));
-document.addEventListener('keydown',e=>{
-  if(e.key==='ArrowRight')nextCard();
-  if(e.key==='ArrowLeft')prevCard();
-  if(e.key==='Escape'&&quick)toggleQuick();
-});
-function scrollPage(amount){
-  window.scrollBy({top:amount,behavior:'smooth'});
-}
-document.addEventListener('wheel',e=>{
-  window.scrollBy(0,e.deltaY);
-},{passive:true});
-render();
+search.addEventListener("input",e=>renderMenu(e.target.value));
+renderMenu();
 </script>
 </body>
 </html>
